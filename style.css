@@ -1,0 +1,45 @@
+@font-face {
+    font-family: 'ichigojam';
+    font-style: normal;
+    font-weight: 400;
+    src: url("https://cdn.jsdelivr.net/gh/fu-sen/ichigojam-font@20190814/IchigoJam-1.4.woff") format('woff');
+}
+
+body {
+    background-color: #000000;
+    cursor: none;
+    overflow: hidden;
+    user-select: none;
+}
+
+canvas {
+    background-color: #00000000;
+    display: block;
+    margin: 30px auto 40px auto;
+}
+
+.unit {
+    margin: 0 auto;
+    justify-content: center;
+    display: flex;
+    width: 1480px;
+    height: 94px;
+}
+
+.unit div {
+    width: 100%;
+    background-color: #a1f2de;
+    display: flex;
+    width: 64px;
+    justify-content: center;
+    align-items: center;
+    margin: 15px;
+}
+
+.unit h1 {
+    text-align: center;
+    font-family: 'ichigojam';
+    color: #ffffff;
+    margin: 0;
+    font-size: 36px;
+}
