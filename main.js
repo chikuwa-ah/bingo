@@ -141,6 +141,7 @@ class EventManager {
         this.sequence = sequence;
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleClick = this.handleClick.bind(this);
+        this.clickedElement = document.getElementById('main');
     };
 
     handleKeyDown(event) {
@@ -157,12 +158,12 @@ class EventManager {
 
     addEvent() {
         document.addEventListener('keydown', this.handleKeyDown);
-        window.addEventListener('click', this.handleClick);
+        this.clickedElement.addEventListener('click', this.handleClick);
     };
 
     removeEvent() {
         document.removeEventListener('keydown', this.handleKeyDown);
-        window.removeEventListener('click', this.handleClick);
+        this.clickedElement.removeEventListener('click', this.handleClick);
     };
 };
 
@@ -233,6 +234,41 @@ const initialNumberDOMCreate = () => {
 };
 
 
+const switchFullScreen = (event) => {
+    if (event.key === "f" || event.type === "click") {
+        if (checkFullScreen()) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            };
+        } else {
+            if (document.body.requestFullscreen) {
+                document.body.requestFullscreen();
+            } else if (document.body.mozRequestFullScreen) {
+                document.body.mozRequestFullScreen();
+            } else if (document.body.webkitRequestFullscreen) {
+                document.body.webkitRequestFullscreen();
+            } else if (document.body.msRequestFullscreen) {
+                document.body.msRequestFullscreen();
+            };
+        };
+    };
+};
+
+const checkFullScreen = () => {
+    let fullscreen_flag = false;
+    if (document.fullscreenElement || document.mozFullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+        fullscreen_flag = true;
+    };
+    return fullscreen_flag;
+};
+
+
 window.addEventListener('DOMContentLoaded', () => {
     initialNumberDOMCreate();
     displaySegmentNumber(8, 8, true, '#ffffff');
@@ -240,4 +276,7 @@ window.addEventListener('DOMContentLoaded', () => {
     addEvent(numberKeep);
     audioPlay();
     new MouseManager().addEvent();
+
+    document.addEventListener('keydown', switchFullScreen);
+    document.getElementById('fullScreen').addEventListener('click', switchFullScreen);
 });

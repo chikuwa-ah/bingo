@@ -12,6 +12,15 @@ body {
     user-select: none;
 }
 
+.fullScreen-button {
+    position: fixed;
+    bottom: 5px;
+    right: 20px;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 30px;
+}
+
 canvas {
     background-color: #00000000;
     display: block;
