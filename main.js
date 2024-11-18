@@ -48,6 +48,10 @@ const displaySegmentNumber = (tenth, ones, isFinished, color) => {
     const onesPattern = SEGMENT[ones];
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (isFinished) {
+        ctx.fillStyle = color;
+        ctx.fillRect(380, 300, 20, 20)
+    };
 
     tenthPattern.forEach((isLighting, index) => {
         ctx.fillStyle = isLighting ? color : '#252525';
@@ -59,7 +63,6 @@ const displaySegmentNumber = (tenth, ones, isFinished, color) => {
         ctx.fillRect(startX, ...COORDINATE[index].slice(1));
     });
 
-    if (isFinished) ctx.fillRect(380, 300, 20, 20);
 };
 
 const displayAlreadyPublished = (result) => {
