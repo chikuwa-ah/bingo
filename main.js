@@ -23,20 +23,19 @@ const COORDINATE = [
 ];
 
 
-const audioPlay = () => {
-    const div0 = document.getElementById('sound0');
-    const div1 = document.getElementById('sound1');
+const playAudio = () => {
+    const sound0Div = document.getElementById('sound0');
+    const sound1Div = document.getElementById('sound1');
 
-    div0.addEventListener('click', () => {
-        const se = new Audio('./sound/pi.mp3');
-        se.currentTime = 0;
-        se.play();
+    sound0Div.addEventListener('click', () => {
+        const piSound = new Audio('./sound/pi.mp3');
+        piSound.currentTime = 0;
+        piSound.play();
     });
-    div1.addEventListener('click', () => {
+    sound1Div.addEventListener('click', () => {
         const index = Math.floor(Math.random() * 11);
-        const se = new Audio(`./sound/./decide/${index}.mp3`);
-        se.currentTime = 0;
-        se.play();
+        const decideSound = new Audio(`./sound/decide/${index}.mp3`);
+        decideSound.play();
     });
 };
 
@@ -50,7 +49,10 @@ const displaySegmentNumber = (tenth, ones, isFinished, color) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (isFinished) {
         ctx.fillStyle = color;
-        ctx.fillRect(380, 300, 20, 20)
+        ctx.fillRect(380, 300, 20, 20);
+    } else {
+        ctx.fillStyle = '#252525';
+        ctx.fillRect(380, 300, 20, 20);
     };
 
     tenthPattern.forEach((isLighting, index) => {
@@ -82,18 +84,24 @@ const divided = (result) => {
 };
 
 
-const shake = (result, remaining, sequence, eventManager) => {
-    const shakeTimes = sequence.getAmount() > 1 ? Math.floor(Math.random() * 40) + 40 : 0;
-    const slowDown = Math.floor(shakeTimes * (Math.floor(Math.random() * 6) + 3) / 10);
-    const dividedResult = divided(result);
-    let count = 0, slowPace = 2, slowDownCount = 0;
+const calculateShakeTimes = (sequence) => {
+    return sequence.getAmount() > 1 ? Math.floor(Math.random() * 40) + 40 : 0;
+};
 
-    const round = setInterval(() => {
+const calculateSlowDown = (shakeTimes) => {
+    return Math.floor(shakeTimes * (Math.floor(Math.random() * 6) + 3) / 10);
+};
+
+const createShakeInterval = (result, remaining, sequence, eventManager, shakeTimes, slowDown) => {
+    let count = 0;
+    let slowPace = 2;
+    let slowDownCount = 0;
+
+    const intervalCallback = () => {
         const random = divided(remaining[Math.floor(Math.random() * remaining.length)].number);
 
         if (count < slowDown || slowDownCount % slowPace === 0) {
-            const div = document.getElementById('sound0');
-            div.click();
+            playSound('sound0');
             displaySegmentNumber(random.tenth, random.ones, false, '#ffffff');
             if (count >= slowDown) {
                 slowPace += 2;
@@ -102,22 +110,38 @@ const shake = (result, remaining, sequence, eventManager) => {
         };
 
         if (count > shakeTimes) {
-            clearInterval(round);
+            clearInterval(timer);
             setTimeout(() => {
-                const div = document.getElementById('sound1');
-                div.click();
-                const hsl = `hsl(${Math.floor(Math.random() * 240) - 60}, 100%, 50%)`;
-                displaySegmentNumber(dividedResult.tenth, dividedResult.ones, true, hsl);
-                sequence.select(result);
-                displayAlreadyPublished(result);
+                playSound('sound1');
+                displayFinalNumber(result, sequence);
                 eventManager.addEvent();
-                const mouse = new MouseManager();
+                const mouse = new MouseEventManager();
                 mouse.addEvent();
             }, 1000);
         };
         if (count >= slowDown) slowDownCount++;
         count++;
-    }, 100);
+    };
+
+    const timer = setInterval(intervalCallback, 100);
+};
+
+const playSound = (soundId) => {
+    const div = document.getElementById(soundId);
+    div.click();
+};
+
+const displayFinalNumber = (result, sequence) => {
+    const hsl = `hsl(${Math.floor(Math.random() * 240) - 60}, 100%, 50%)`;
+    displaySegmentNumber(divided(result).tenth, divided(result).ones, true, hsl);
+    sequence.select(result);
+    displayAlreadyPublished(result);
+};
+
+const shake = (result, remaining, sequence, eventManager) => {
+    const shakeTimes = calculateShakeTimes(sequence);
+    const slowDown = calculateSlowDown(shakeTimes);
+    createShakeInterval(result, remaining, sequence, eventManager, shakeTimes, slowDown);
 };
 
 
@@ -135,11 +159,11 @@ const roll = (sequence, eventManager) => {
 
 
 const addEvent = (sequence) => {
-    const manager = new EventManager(sequence);
+    const manager = new KeyEventManager(sequence);
     manager.addEvent();
 };
 
-class EventManager {
+class KeyEventManager {
     constructor(sequence) {
         this.sequence = sequence;
         this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -171,7 +195,7 @@ class EventManager {
 };
 
 
-class MouseManager {
+class MouseEventManager {
     constructor() {
         this.handleMouseMove = this.handleMouseMove.bind(this);
     };
@@ -263,13 +287,7 @@ const switchFullScreen = (event) => {
     };
 };
 
-const checkFullScreen = () => {
-    let fullscreen_flag = false;
-    if (document.fullscreenElement || document.mozFullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
-        fullscreen_flag = true;
-    };
-    return fullscreen_flag;
-};
+const checkFullScreen = () => document.fullscreenElement || document.mozFullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
 
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -277,8 +295,8 @@ window.addEventListener('DOMContentLoaded', () => {
     displaySegmentNumber(8, 8, true, '#ffffff');
     const numberKeep = new RestNumber();
     addEvent(numberKeep);
-    audioPlay();
-    new MouseManager().addEvent();
+    playAudio();
+    new MouseEventManager().addEvent();
 
     document.addEventListener('keydown', switchFullScreen);
     document.getElementById('fullScreen').addEventListener('click', switchFullScreen);
